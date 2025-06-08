@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import '../models/analysis_result.dart';
 
 // WARNING: Storing API keys directly in code is insecure and not recommended for production.
 // Use environment variables or a secure secret management solution.
@@ -41,6 +43,42 @@ class GeminiApiService {
     } catch (e) {
       // Log the error and return null
       print('Error transcribing audio: $e');
+      return null;
+    }
+  }
+
+  Future<AnalysisResult?> analyzeText(String textToAnalyze) async {
+    try {
+      // Initialize the Gemini model (or reuse if already initialized)
+      final model = GenerativeModel(
+        model: 'gemini-1.5-flash-latest',
+        apiKey: _apiKey,
+      );
+
+      final prompt = [
+        Content.text(
+          'Analyze the following text. Your response MUST be a single, valid JSON object with these exact keys: "summary", "sentiment", "key_phrases", "topics".\n\n'
+          'Text to analyze:\n'
+          '"""$textToAnalyze"""'
+        )
+      ];
+
+      final response = await model.generateContent(prompt);
+
+      if (response.text == null) {
+        throw Exception('Received null response from API');
+      }
+
+      String cleanedJsonString = response.text!
+          .replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim();
+      
+      final Map<String, dynamic> jsonData = jsonDecode(cleanedJsonString);
+      return AnalysisResult.fromJson(jsonData);
+
+    } catch (e) {
+      print('Error analyzing text: $e');
       return null;
     }
   }
