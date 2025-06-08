@@ -18,6 +18,7 @@ dependencies:
   permission_handler: ^11.1.0    # To request microphone and storage permissions
   provider: ^6.1.1               # For simple state management
   iconsax: ^0.0.8                # For the icons shown in the UI mockups
+  flutter_secure_storage: ^9.0.0 # For secure storage of API keys
 
 dev_dependencies:
   flutter_test:

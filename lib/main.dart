@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/dictation_screen.dart';
+import 'screens/settings_screen.dart';
 
 void main() {
   runApp(const TranscriptionApp());
@@ -13,7 +14,10 @@ class TranscriptionApp extends StatelessWidget {
     return MaterialApp(
       title: 'Transcription App',
       theme: ThemeData.dark().copyWith(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.black87,
           foregroundColor: Colors.white,
@@ -21,6 +25,9 @@ class TranscriptionApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
       ),
       home: const DictationScreen(),
+      routes: {
+        '/settings': (context) => const SettingsScreen(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }

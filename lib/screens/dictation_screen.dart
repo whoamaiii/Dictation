@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io'; // Required for Directory
 import '../services/gemini_api_service.dart'; // Added import
 import 'analysis_screen.dart'; // Import for AnalysisScreen
+import '../services/secure_storage_service.dart'; // Added import for secure storage
 
 class DictationScreen extends StatefulWidget {
   const DictationScreen({super.key});
@@ -22,12 +23,32 @@ class DictationScreen extends StatefulWidget {
 class _DictationScreenState extends State<DictationScreen> {
   final AudioRecorder _audioRecorder = AudioRecorder();
   final GeminiApiService _geminiApiService = GeminiApiService(); // Added service instance
+  final SecureStorageService _secureStorageService = SecureStorageService(); // Added secure storage instance
   bool _isRecording = false;
   String? _audioPath;
   String _transcription = 'Transcription will appear here'; // Added state variable
   bool _isTranscribing = false; // Added state variable
 
   Future<void> _toggleRecording() async {
+    // Check for API key first
+    final hasApiKey = await _secureStorageService.hasApiKey();
+    if (!hasApiKey) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Please set your Gemini API key in Settings first.'),
+            action: SnackBarAction(
+              label: 'Go to Settings',
+              onPressed: () {
+                Navigator.pushNamed(context, '/settings');
+              },
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
     // Check for microphone permission first
     if (!await _audioRecorder.hasPermission()) {
       // Request permission if not granted

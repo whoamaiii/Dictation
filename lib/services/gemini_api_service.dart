@@ -2,24 +2,30 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/analysis_result.dart';
-
-// WARNING: Storing API keys directly in code is insecure and not recommended for production.
-// Use environment variables or a secure secret management solution.
-const String _apiKey = 'AIzaSyBhqoI7oJ-ekGsPZb66hGzuwPZ1sQnjphE';
+import 'secure_storage_service.dart';
 
 /// Service class for handling all communication with the Gemini API
 class GeminiApiService {
+  final _secureStorageService = SecureStorageService();
+
   /// Transcribes an audio file using the Gemini API
   /// 
   /// Takes an [audioFilePath] pointing to an audio file (e.g., .m4a format)
   /// and returns the transcribed text as a String.
-  /// Returns null if an error occurs during transcription.
+  /// Returns null if an error occurs during transcription or if no API key is configured.
   Future<String?> transcribeAudio(String audioFilePath) async {
     try {
+      // Get API key from secure storage
+      final apiKey = await _secureStorageService.getApiKey();
+      if (apiKey == null || apiKey.isEmpty) {
+        print('No API key configured. Please add your Gemini API key in settings.');
+        return null;
+      }
+
       // Initialize the Gemini model
       final model = GenerativeModel(
         model: 'gemini-1.5-flash-latest',
-        apiKey: _apiKey,
+        apiKey: apiKey,
       );
 
       // Read the audio file
@@ -49,10 +55,17 @@ class GeminiApiService {
 
   Future<AnalysisResult?> analyzeText(String textToAnalyze) async {
     try {
-      // Initialize the Gemini model (or reuse if already initialized)
+      // Get API key from secure storage
+      final apiKey = await _secureStorageService.getApiKey();
+      if (apiKey == null || apiKey.isEmpty) {
+        print('No API key configured. Please add your Gemini API key in settings.');
+        return null;
+      }
+
+      // Initialize the Gemini model
       final model = GenerativeModel(
         model: 'gemini-1.5-flash-latest',
-        apiKey: _apiKey,
+        apiKey: apiKey,
       );
 
       final prompt = [

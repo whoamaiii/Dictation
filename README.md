@@ -77,3 +77,4 @@ The app uses a dark theme with:
 5. Build out the UI components in each screen
 6. Add state management with Provider
 7. Configure permissions for microphone access 
+
