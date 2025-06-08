@@ -1,0 +1,28 @@
+name: transcription_app
+description: A Flutter transcription app using Gemini API.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following dependencies are required for the transcription app:
+  google_generative_ai: ^0.4.3  # For interacting with the Gemini API
+  record: ^5.0.4                 # For recording audio from the microphone
+  path_provider: ^2.1.1          # To find the correct local path to save recordings
+  permission_handler: ^11.1.0    # To request microphone and storage permissions
+  provider: ^6.1.1               # For simple state management
+  iconsax: ^0.0.8                # For the icons shown in the UI mockups
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true 
