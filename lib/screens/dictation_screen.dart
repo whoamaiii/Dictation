@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io'; // Required for Directory
 import '../services/gemini_api_service.dart'; // Added import
+import 'analysis_screen.dart'; // Import for AnalysisScreen
 
 class DictationScreen extends StatefulWidget {
   const DictationScreen({super.key});
@@ -181,7 +182,16 @@ class _DictationScreenState extends State<DictationScreen> {
                           child: OutlinedButton.icon(
                             icon: const Icon(Iconsax.document_text_1), // Changed for better context
                             label: const Text('Analyze'),
-                            onPressed: null, // No action for now
+                            onPressed: (_transcription.isNotEmpty && !_transcription.startsWith('Error') && _transcription != 'Transcription will appear here' && !_isTranscribing)
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AnalysisScreen(transcribedText: _transcription),
+                                    ),
+                                  );
+                                }
+                              : null, // This will disable the button
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               foregroundColor: Theme.of(context).colorScheme.onBackground,
