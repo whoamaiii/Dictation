@@ -9,6 +9,7 @@ import 'package:record/record.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io'; // Required for Directory
+import '../services/gemini_api_service.dart'; // Added import
 
 class DictationScreen extends StatefulWidget {
   const DictationScreen({super.key});
@@ -19,8 +20,11 @@ class DictationScreen extends StatefulWidget {
 
 class _DictationScreenState extends State<DictationScreen> {
   final AudioRecorder _audioRecorder = AudioRecorder();
+  final GeminiApiService _geminiApiService = GeminiApiService(); // Added service instance
   bool _isRecording = false;
   String? _audioPath;
+  String _transcription = 'Transcription will appear here'; // Added state variable
+  bool _isTranscribing = false; // Added state variable
 
   Future<void> _toggleRecording() async {
     // Check for microphone permission first
@@ -42,11 +46,30 @@ class _DictationScreenState extends State<DictationScreen> {
     if (_isRecording) {
       // Stop recording
       final String? path = await _audioRecorder.stop();
-      setState(() {
-        _isRecording = false;
-        _audioPath = path;
-      });
-      // You can add a print statement to verify the path: print('Recording saved at: $_audioPath');
+
+      if (path != null) {
+        // If recording was successful and we have a path
+        setState(() {
+          _isRecording = false;
+          _audioPath = path;
+          _isTranscribing = true; // Start loading indicator
+          _transcription = 'Transcribing...'; // Update text
+        });
+
+        // Call the API service
+        final String? result = await _geminiApiService.transcribeAudio(_audioPath!);
+        
+        // Update the UI with the result
+        setState(() {
+          _transcription = result ?? 'Error: Could not transcribe audio.';
+          _isTranscribing = false; // Stop loading indicator
+        });
+      } else {
+        // Handle case where recording failed to produce a path
+        setState(() {
+          _isRecording = false;
+        });
+      }
     } else {
       // Start recording
       // Get a temporary directory to save the recording
@@ -113,12 +136,17 @@ class _DictationScreenState extends State<DictationScreen> {
                       borderRadius: BorderRadius.circular(8.0),
                       color: Colors.grey.shade800.withOpacity(0.5),
                     ),
-                    child: const Center( // Center the placeholder text for better appearance
-                      child: Text(
-                        'Transcription will appear here',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
+                    child: _isTranscribing
+                        ? const Center(child: CircularProgressIndicator())
+                        : SingleChildScrollView(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                _transcription,
+                                style: TextStyle(color: _transcription.startsWith('Error:') ? Colors.redAccent : Colors.white),
+                              ),
+                            ),
+                          ), // Updated UI for transcription display
                   ),
                 ),
               ],
